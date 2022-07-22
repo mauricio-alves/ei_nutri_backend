@@ -1,6 +1,6 @@
 const UserModel = require("../models/User.model");
 
-module.exports = async (req, res, next) => {
+async function attachCurrentUser(req, res, next) {
   try {
     const loggedInUser = req.auth;
     console.log(loggedInUser);
@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
     );
 
     if (!user) {
-      return res.status(400).json({ msg: "This user does not exist." });
+      return res.status(400).json({ message: "This user does not exist." });
     }
 
     req.currentUser = user;
@@ -20,4 +20,6 @@ module.exports = async (req, res, next) => {
     console.log(error);
     return res.status(500).json(error);
   }
-};
+}
+
+module.exports = attachCurrentUser;

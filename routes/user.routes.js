@@ -9,27 +9,32 @@ const isAdmin = require("../middlewares/isAdmin");
 
 const saltRounds = 10;
 
+// SIGN UP
 router.post("/signup", async (req, res) => {
   try {
-    // Primeira coisa: Criptografar a senha!
-
     const { password } = req.body;
 
-    if (!password) {
+    if (
+      !password ||
+      !password.match(
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[$*&@#])[0-9a-zA-Z$*&@#]{8,}$/
+      )
+    ) {
       return res.status(400).json({
         msg: "Password is required and must have at least 8 characters, uppercase and lowercase letters, numbers and special characters.",
       });
     }
 
     const salt = await bcrypt.genSalt(saltRounds);
-    const passwordHash = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const createdUser = await UserModel.create({
       ...req.body,
-      passwordHash: passwordHash,
+      passwordHash: hashedPassword,
     });
 
     delete createdUser._doc.passwordHash;
+    delete createdUser._doc.__v;
 
     return res.status(201).json(createdUser);
   } catch (error) {
@@ -38,6 +43,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+// LOGIN
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -45,11 +51,20 @@ router.post("/login", async (req, res) => {
     const user = await UserModel.findOne({ email: email });
 
     if (!user) {
-      return res.status(400).json({ msg: "Wrong password or email." });
+      return res.status(400).json({ message: "Wrong password or email." });
+    }
+
+    if (user.isActive === false) {
+      await UserModel.findOneAndUpdate(
+        { email: email },
+        { isActive: true },
+        { runValidators: true, new: true }
+      );
     }
 
     if (await bcrypt.compare(password, user.passwordHash)) {
       delete user._doc.passwordHash;
+      delete user._doc.__v;
       const token = generateToken(user);
 
       return res.status(200).json({
@@ -57,7 +72,7 @@ router.post("/login", async (req, res) => {
         user: { ...user._doc },
       });
     } else {
-      return res.status(400).json({ msg: "Wrong password or email." });
+      return res.status(400).json({ message: "Wrong password or email." });
     }
   } catch (error) {
     console.log(error);
@@ -65,10 +80,28 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/profile", isAuth, attachCurrentUser, (req, res) => {
+// READ USER DETAILS
+router.get("/profile", isAuth, attachCurrentUser, async (req, res) => {
+  try {
+    const loggedUser = req.currentUser;
+
+    if (!loggedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const user = await UserModel.findOne({ _id: loggedUser._id });
+
+    delete user._doc.passwordHash;
+    delete user._doc.__v;
+
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
   return res.status(200).json(req.currentUser);
 });
 
+// UPDATE USER PROFILE
 router.patch("/update-profile", isAuth, attachCurrentUser, async (req, res) => {
   try {
     const loggedInUser = req.currentUser;
@@ -88,8 +121,9 @@ router.patch("/update-profile", isAuth, attachCurrentUser, async (req, res) => {
   }
 });
 
-//SOFT DELETE
+// A
 
+//SOFT DELETE
 router.delete(
   "/disable-profile",
   isAuth,
