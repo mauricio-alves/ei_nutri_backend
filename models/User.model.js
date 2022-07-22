@@ -1,4 +1,4 @@
-const { Schema, model, default: mongoose } = require("mongoose");
+const { Schema, model, Types } = require("mongoose");
 
 const userSchema = new Schema({
   name: { type: String, required: true, trim: true },
@@ -14,6 +14,24 @@ const userSchema = new Schema({
   role: { type: String, enum: ["ADMIN", "USER"], default: "USER" },
   isActive: { type: Boolean, default: true },
   disabledOn: { type: Date },
+  age: { type: Number, required: true, trim: true },
+  weight: { type: Number, required: true, trim: true },
+  height: { type: Number, required: true, trim: true },
+  whyAreYouHere: {
+    type: String,
+    enum: [
+      "Health",
+      "Weight Management",
+      "Food allergy",
+      "Digestive Issues",
+      "Meal Planning",
+      "Abnormal Lab Values",
+      "Other",
+    ],
+    default: "Health",
+  },
+  nutritionist: { type: Types.ObjectId, ref: "Admin" },
+  diets: [{ type: Types.ObjectId, ref: "Admin" }],
 });
 
 const UserModel = model("User", userSchema);
