@@ -1,7 +1,7 @@
 const { Schema, model, Types } = require("mongoose");
 
 const adminSchema = new Schema({
-  name: { type: String, required: true, trim: true },
+  name: { type: String, required: true, trim: true, match: /\s/ },
   email: {
     type: String,
     required: true,
@@ -14,8 +14,9 @@ const adminSchema = new Schema({
   role: { type: String, enum: ["ADMIN", "USER"], default: "ADMIN" },
   isActive: { type: Boolean, default: true },
   disabledOn: { type: Date },
+  address: { type: String, required: true, trim: true },
   patients: [{ type: Types.ObjectId, ref: "User" }],
-  diets: [{ type: Types.ObjectId, ref: "Admin" }],
+  reviews: [{ type: Types.ObjectId, ref: "Review" }],
 });
 
 const AdminModel = model("Admin", adminSchema);

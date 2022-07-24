@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const UserModel = require("../models/User.model");
+const AdminModel = require("../models/Admin.model");
 
 const generateToken = require("../config/jwt.config");
 const isAuth = require("../middlewares/isAuth");
@@ -21,7 +22,8 @@ router.post("/signup", async (req, res) => {
       )
     ) {
       return res.status(400).json({
-        msg: "Password is required and must have at least 8 characters, uppercase and lowercase letters, numbers and special characters.",
+        message:
+          "Password is required and must have at least 8 characters, uppercase and lowercase letters, numbers and special characters.",
       });
     }
 
@@ -36,7 +38,9 @@ router.post("/signup", async (req, res) => {
     delete createdUser._doc.passwordHash;
     delete createdUser._doc.__v;
 
-    return res.status(201).json(createdUser);
+    return res
+      .status(201)
+      .json({ message: "User created with success!", createdUser });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
@@ -89,12 +93,15 @@ router.get("/profile", isAuth, attachCurrentUser, async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    const user = await UserModel.findOne({ _id: loggedUser._id });
+    const user = await UserModel.findOne({ _id: loggedUser._id }).populate(
+      "nutritionist",
+      { passwordHash: 0, __v: 0, patients: 0 }
+    );
 
     delete user._doc.passwordHash;
     delete user._doc.__v;
 
-    return res.status(200).json(user);
+    return res.status(200).json({ message: "User founded!", user });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -104,26 +111,107 @@ router.get("/profile", isAuth, attachCurrentUser, async (req, res) => {
 // UPDATE USER PROFILE
 router.patch("/update-profile", isAuth, attachCurrentUser, async (req, res) => {
   try {
-    const loggedInUser = req.currentUser;
+    const loggedUser = req.currentUser;
 
     const updatedUser = await UserModel.findOneAndUpdate(
-      { _id: loggedInUser._id },
+      { _id: loggedUser._id },
       { ...req.body },
       { runValidators: true, new: true }
     );
 
     delete updatedUser._doc.passwordHash;
+    delete updatedUser._doc.__v;
 
-    return res.status(200).json(updatedUser);
+    return res
+      .status(200)
+      .json({ message: "User updated with success!", updatedUser });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
   }
 });
 
-// A
+// PAGE WITH A LIST OF NUTRITIONISTS TO CHOOSE
+router.get("/catalog", isAuth, attachCurrentUser, async (req, res) => {
+  try {
+    const loggedUser = req.currentUser;
 
-//SOFT DELETE
+    const allNutris = await AdminModel.find(
+      {},
+      { passwordHash: 0, __v: 0, patients: 0 }
+    );
+
+    return res.status(200).json({
+      message: "Success! Here is the list of nutritionists:",
+      allNutris,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+});
+
+// PAGE TO ADD THE NUTRITIONIST AND CREATE THE APPOINTMENT
+router.patch(
+  "/nutri-added/:userId/:adminId",
+  isAuth,
+  attachCurrentUser,
+  async (req, res) => {
+    try {
+      const { userId, adminId } = req.params;
+
+      await UserModel.findOneAndUpdate(
+        { _id: userId },
+        { $push: { nutritionist: adminId } },
+        { runValidators: true }
+      );
+
+      await AdminModel.findOneAndUpdate(
+        { _id: adminId },
+        { $push: { patients: userId } },
+        { runValidators: true }
+      );
+
+      return res
+        .status(200)
+        .json({ message: "Nutritionist added with success!" });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  }
+);
+
+// PAGE TO REMOVE THE NUTRITIONIST
+router.patch(
+  "/nutri-removed/:userId/:adminId",
+  isAuth,
+  attachCurrentUser,
+  async (req, res) => {
+    try {
+      const { userId, adminId } = req.params;
+
+      await UserModel.updateOne(
+        { _id: userId },
+        { $pull: { nutritionist: adminId } }
+      );
+
+      await AdminModel.updateOne(
+        { _id: adminId },
+        { $pull: { patients: userId } }
+      );
+
+      return res
+        .status(200)
+        .json({ message: "Nutritionist removed with success!" });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  }
+);
+
+// SOFT DELETE
 router.delete(
   "/disable-profile",
   isAuth,
@@ -137,8 +225,11 @@ router.delete(
       );
 
       delete disabledUser._doc.passwordHash;
+      delete disabledUser._doc.__v;
 
-      return res.status(200).json(disabledUser);
+      return res
+        .status(200)
+        .json({ message: "User deleted with success!", disabledUser });
     } catch (error) {
       console.log(error);
       return res.status(500).json(error);

@@ -1,7 +1,7 @@
 const { Schema, model, Types } = require("mongoose");
 
 const userSchema = new Schema({
-  name: { type: String, required: true, trim: true },
+  name: { type: String, required: true, trim: true, match: /\s/ },
   email: {
     type: String,
     required: true,
@@ -31,7 +31,7 @@ const userSchema = new Schema({
     default: "Health",
   },
   nutritionist: { type: Types.ObjectId, ref: "Admin" },
-  diets: [{ type: Types.ObjectId, ref: "Admin" }],
+  review: { type: Types.ObjectId, ref: "Review" },
 });
 
 const UserModel = model("User", userSchema);

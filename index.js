@@ -16,6 +16,9 @@ app.use("/user", userRouter);
 const adminRouter = require("./routes/admin.routes");
 app.use("/admin", adminRouter);
 
+const reviewRouter = require("./routes/review.routes");
+app.use("/review", reviewRouter);
+
 app.listen(Number(process.env.PORT), () => {
   console.log("Server up and running at port:", process.env.PORT);
 });
