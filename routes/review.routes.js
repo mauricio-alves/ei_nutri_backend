@@ -39,6 +39,30 @@ router.patch(
     }
   }
 );
+// UPDATE THE REVIEW
+router.patch(
+  "/edit-review/:reviewId",
+  isAuth,
+  attachCurrentUser,
+  async (req, res) => {
+    try {
+      const { reviewId } = req.params;
+
+      const updatedReview = await ReviewModel.findOneAndUpdate(
+        { _id: reviewId },
+        { ...req.body },
+        { runValidators: true, new: true }
+      );
+
+      return res
+        .status(200)
+        .json({ message: "Review updated with success!", updatedReview });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  }
+);
 
 // DELETE REVIEW
 router.delete(
