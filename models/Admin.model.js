@@ -20,7 +20,7 @@ const adminSchema = new Schema({
   patients: [{ type: Types.ObjectId, ref: "User" }],
   reviews: [{ type: Types.ObjectId, ref: "Review" }],
   address: new Schema({
-    zipCode: { type: Number, maxLength: 9, required: true },
+    zipcode: { type: String, maxLength: 9, required: true },
     street: { type: String, required: true, trim: true, maxLength: 64 },
     number: { type: Number, maxLength: 6, required: true },
     neighborhood: { type: String, maxLength: 144 },
