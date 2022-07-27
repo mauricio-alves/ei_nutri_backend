@@ -151,6 +151,32 @@ router.get("/catalog", isAuth, attachCurrentUser, async (req, res) => {
   }
 });
 
+// PAGE TO SEE DE NUTRITIONIST DETAILS
+router.get(
+  "/nutri-profile/:adminId",
+  isAuth,
+  attachCurrentUser,
+  async (req, res) => {
+    try {
+      const loggedUser = req.currentUser;
+      const { adminId } = req.params;
+
+      const nutri = await AdminModel.find(
+        { _id: adminId },
+        { passwordHash: 0, __v: 0, patients: 0 }
+      );
+
+      return res.status(200).json({
+        message: "Success! Here is the profile of the selected nutritionist:",
+        nutri,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  }
+);
+
 // PAGE TO ADD THE NUTRITIONIST AND CREATE THE APPOINTMENT
 router.patch(
   "/nutri-added/:userId/:adminId",
