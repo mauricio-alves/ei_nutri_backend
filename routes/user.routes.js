@@ -187,7 +187,7 @@ router.patch(
 
       await UserModel.findOneAndUpdate(
         { _id: userId },
-        { $push: { nutritionist: adminId } },
+        { $push: { nutritionists: adminId } },
         { runValidators: true }
       );
 
