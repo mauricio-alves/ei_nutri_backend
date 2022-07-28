@@ -11,7 +11,7 @@ const userSchema = new Schema({
   },
   passwordHash: { type: String, required: true },
   img: { type: String },
-  appointments: { type: Types.ObjectId, ref: "Admin" },
+  appointments: { type: String },
   role: { type: String, enum: ["ADMIN", "USER"], default: "USER" },
   isActive: { type: Boolean, default: true },
   disabledOn: { type: Date },
