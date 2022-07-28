@@ -32,7 +32,7 @@ const userSchema = new Schema({
     required: true,
   },
   nutritionists: [{ type: Types.ObjectId, ref: "Admin" }],
-  review: { type: Types.ObjectId, ref: "Review" },
+  reviews: [{ type: Types.ObjectId, ref: "Review" }],
 });
 
 const UserModel = model("User", userSchema);
