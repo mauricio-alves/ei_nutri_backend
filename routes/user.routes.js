@@ -10,6 +10,7 @@ const isAdmin = require("../middlewares/isAdmin");
 
 const saltRounds = 10;
 
+
 // SIGN UP
 router.post("/signup", async (req, res) => {
   try {
