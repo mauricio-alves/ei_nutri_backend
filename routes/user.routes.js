@@ -176,7 +176,7 @@ router.get(
   }
 );
 
-// PAGE TO ADD THE NUTRITIONIST AND CREATE THE APPOINTMENT
+// PAGE TO ADD THE NUTRITIONIST
 router.patch(
   "/nutri-added/:userId/:adminId",
   isAuth,
@@ -200,6 +200,35 @@ router.patch(
       return res
         .status(200)
         .json({ message: "Nutritionist added with success!" });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  }
+);
+
+// PAGE TO CREATE THE APPOINTMENT
+// criar nova rota => adicionar no campo appointments SETAPPOINTMENT
+// findoneandupdate(id do nutri) set no appointment
+router.patch(
+  "/appointment-created/:adminId",
+  isAuth,
+  attachCurrentUser,
+  async (req, res) => {
+    try {
+      const { adminId } = req.params;
+
+      const updatedAdmin = await AdminModel.findOneAndUpdate(
+        { _id: adminId },
+        { ...req.body },
+        { runValidators: true, new: true }
+      );
+      delete updatedAdmin._doc.passwordHash;
+      delete updatedAdmin._doc.__v;
+
+      return res
+        .status(200)
+        .json({ message: "Appointment created with success!" });
     } catch (error) {
       console.log(error);
       return res.status(500).json(error);
