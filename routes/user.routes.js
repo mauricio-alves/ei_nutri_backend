@@ -10,7 +10,6 @@ const isAdmin = require("../middlewares/isAdmin");
 
 const saltRounds = 10;
 
-
 // SIGN UP
 router.post("/signup", async (req, res) => {
   try {
@@ -178,7 +177,7 @@ router.get(
   }
 );
 
-// PAGE TO ADD THE NUTRITIONIST AND THE PATIENT
+// PAGE TO ADD THE NUTRITIONIST AND CREATE THE APPOINTMENT
 router.patch(
   "/nutri-added/:userId/:adminId",
   isAuth,
@@ -196,37 +195,6 @@ router.patch(
       await AdminModel.findOneAndUpdate(
         { _id: adminId },
         { $push: { patients: userId } },
-        { runValidators: true }
-      );
-
-      return res
-        .status(200)
-        .json({ message: "Nutritionist added with success!" });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json(error);
-    }
-  }
-);
-
-// ROUTE TO CREATE THE APPOINTMENT FOR BOTH
-router.patch(
-  "/appointment-created/:userId/:adminId",
-  isAuth,
-  attachCurrentUser,
-  async (req, res) => {
-    try {
-      const { userId, adminId } = req.params;
-
-      await UserModel.findOneAndUpdate(
-        { _id: userId },
-        { $push: { appointments: adminId } },
-        { runValidators: true }
-      );
-
-      await AdminModel.findOneAndUpdate(
-        { _id: adminId },
-        { $push: { appointments: userId } },
         { runValidators: true }
       );
 
