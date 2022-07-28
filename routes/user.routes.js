@@ -188,13 +188,13 @@ router.patch(
 
       await UserModel.findOneAndUpdate(
         { _id: userId },
-        { $push: { nutritionist: adminId } },
+        { $push: { nutritionist: adminId }, $push: { appointments: adminId } },
         { runValidators: true }
       );
 
       await AdminModel.findOneAndUpdate(
         { _id: adminId },
-        { $push: { patients: userId } },
+        { $push: { patients: userId }, $push: { appointments: userId } },
         { runValidators: true }
       );
 
