@@ -11,7 +11,7 @@ const userSchema = new Schema({
   },
   passwordHash: { type: String, required: true },
   img: { type: String },
-  appointments: { type: String },
+  appointments: [{ type: String, default: 'Sem consultas' }],
   role: { type: String, enum: ["ADMIN", "USER"], default: "USER" },
   isActive: { type: Boolean, default: true },
   disabledOn: { type: Date },
@@ -31,7 +31,7 @@ const userSchema = new Schema({
     default: "Saúde",
     required: true,
   },
-  nutritionist: { type: Types.ObjectId, ref: "Admin" },
+  nutritionists: [{ type: Types.ObjectId, ref: "Admin" }],
   review: { type: Types.ObjectId, ref: "Review" },
 });
 
