@@ -93,10 +93,9 @@ router.get("/profile", isAuth, attachCurrentUser, async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    const user = await UserModel.findOne({ _id: loggedUser._id }).populate(
-      "nutritionist",
-      { passwordHash: 0, __v: 0, patients: 0 }
-    );
+    const user = await UserModel.findOne({ _id: loggedUser._id })
+      .populate("nutritionists", { passwordHash: 0, __v: 0, patients: 0 })
+      .populate("reviews");
 
     delete user._doc.passwordHash;
     delete user._doc.__v;

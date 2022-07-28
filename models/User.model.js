@@ -31,8 +31,8 @@ const userSchema = new Schema({
     default: "Saúde",
     required: true,
   },
-  nutritionists: { type: Types.ObjectId, ref: "Admin" },
-  review: { type: Types.ObjectId, ref: "Review" },
+  nutritionists: [{ type: Types.ObjectId, ref: "Admin" }],
+  reviews: [{ type: Types.ObjectId, ref: "Review" }],
 });
 
 const UserModel = model("User", userSchema);
