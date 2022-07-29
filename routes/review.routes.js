@@ -20,7 +20,7 @@ router.patch(
 
       await UserModel.findOneAndUpdate(
         { _id: userId },
-        { $push: { review: newReview } },
+        { $push: { reviews: newReview } },
         { runValidators: true }
       );
 
