@@ -76,7 +76,7 @@ router.delete(
 
       await UserModel.updateOne(
         { review: reviewId },
-        { $pull: { review: reviewId } }
+        { $pull: { reviews: reviewId } }
       );
 
       await AdminModel.updateOne(
